@@ -14,6 +14,6 @@ router.get('/', (ctx, next) => {
 
 // user 
 router.post('/login', User.login);
-
+router.get('/auth', User.getAuth);
 
 module.exports = router;

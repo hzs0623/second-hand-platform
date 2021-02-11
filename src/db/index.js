@@ -3,10 +3,10 @@
 const mysql = require('mysql');
 
 const config = {
-  host: 'localhost',
+  host: '159.75.102.92',
   user: 'root',
-  password: 'hzs980623',
-  database: 'node', // 数据库
+  password: 'CQGCXYbysj',
+  database: 'daes', // 数据库
   port: 3306,
   multipleStatements: true//允许多条sql同时执行
 }
@@ -20,14 +20,14 @@ const query = (sql, values) => {
   return new Promise((resolve, reject) => {
     pool.getConnection((err, connection) => {
       if (err) return reject(err);
-      connection.query(sql, values, (err, rows) => {
+      connection.query(sql, values, (err, res) => {
         if (err) {
           reject(err);
         } else {
-          resolve(rows);
+          resolve(res);
         }
-        connection.end(); // 关闭数据库
       })
+      connection.release();
     })
   })
 };
