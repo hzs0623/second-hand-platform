@@ -1,5 +1,6 @@
 const Router = require('koa-router');
-const User = require('./user');
+const User = require('./user'); //用户
+const shopList = require('./shopList'); // 商品列
 
 const router = new Router();
 
@@ -14,6 +15,9 @@ router.get('/', (ctx, next) => {
 
 // user 
 router.post('/login', User.login);
-router.get('/auth', User.getAuth);
+router.post('/register', User.registerUser);
+router.post('/user/edit', User.userEdit);
+
+router.get('/shop/list', shopList.getList);
 
 module.exports = router;

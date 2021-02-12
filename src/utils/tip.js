@@ -4,10 +4,6 @@ module.exports = {
     code: 0,
     msg: 'login success'
   },
-  101: {
-    code: 101,
-    msg: 'success'
-  },
   1001: {
     code: 1001,
     msg: 'success!'
@@ -27,6 +23,10 @@ module.exports = {
   1006: {
     code: 1006,
     msg: '账户或密码错误'
+  },
+  1007: {
+    code: 1007,
+    msg: '用户名重复'
   },
   1008: {
     code: 1008,
