@@ -54,9 +54,9 @@ module.exports = {
     })
   },
   /**
-   * 格式化条件
+   * 更新数据格式化条件
   */
-  formatStr(arr) {
+  updateFormatStr(arr) {
     const newArr = arr.map(item => {
       return `${item} = ?`;
     });
@@ -67,11 +67,12 @@ module.exports = {
    * @param {string} data 
    */
   generateToken(data) {
-    let created = Math.floor(Date.now() / 1000);
+    if (!data) return data;
+    let created = Date.now() + 24 * 3600 * 1000; // 一天
     let cert = fs.readFileSync(path.join(__dirname, '../config/pri.pem'));
     let token = jwt.sign({
       data,
-      exp: created + 3600 * 24     // 过期时间  一天
+      iat: created // 过期时间  
     }, cert, { algorithm: 'RS256' });
     return token;
   },
@@ -79,17 +80,17 @@ module.exports = {
    * 校验token
   */
   verifyToken(token) {
-    let cert = fs.readFileSync(path.join(__dirname, '../config/pub.pem')), res = {};
-    try {
-      let result = jwt.verify(token, cert, { algorithms: ['RS256'] }) || {};
-      let { exp = 0 } = result, current = Math.floor(Date.now() / 1000);
-      if (current <= exp) {
-        res = result.data || {};
+    return new Promise((resolve, reject) => {
+      try {
+        const cert = fs.readFileSync(path.join(__dirname, '../config/pub.pem'));
+        let result = jwt.verify(token, cert, { algorithms: ['RS256'] }) || {};
+        let { iat = 0 } = result, current = Date.now();
+
+        current <= iat ? resolve(result.data) : reject('');
+      } catch (e) {
+        reject(e);
       }
-    } catch (e) {
-      console.log(e);
-    }
-    return res;
+    })
 
   }
 }

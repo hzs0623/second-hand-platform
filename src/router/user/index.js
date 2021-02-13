@@ -2,6 +2,26 @@ const { Utils, Tips, functions } = require('../../utils');
 const md5 = require('md5'); // 加密
 const db = require('../../db');
 
+/**
+ * 查询数据库
+ * obj { username: 'daes'} 查询条件
+ * configs ['username']返回值
+ * */
+async function formatUser(obj, configs) {
+  let str = '';
+  let arr = [];
+  Object.keys(obj).forEach((key, i) => {
+    if (i !== 0) {
+      str += `and ${key} = ? `
+    } else {
+      str += `${key} = ?`
+    }
+    arr.push(obj[key]);
+  })
+  const valid = await db.query(`SELECT ${configs.join(',')} FROM user WHERE ${str}`, arr);
+  return valid;
+}
+
 module.exports = class user {
   // 登陆
   static async login(ctx, next) {
@@ -13,22 +33,20 @@ module.exports = class user {
       });
       if (!valid) return ctx.body = Tips[400]; // 参数错误
 
-      const { username, password } = data;
-      const sql = 'SELECT uid, username FROM user WHERE username=? and password=? ';
-      // const sql = options.select(['uid', 'username']).table('user').where(['username','password']);
-      const value = [username, md5(password)];
+      let { username, password } = data;
+      password = md5(password);
+      const isUser = await formatUser({ username, password }, ['username']);
+      if (!isUser.length) return ctx.body = Tips[1006];
 
+      const sql = 'SELECT uid, username FROM user WHERE username=? and password=? ';
+      const value = [username, password];
       const userData = await db.query(sql, value);
-      if (!userData) return Tips[1006]; // 账户密码错误
       const val = userData[0];
       const { uid, username: name = "" } = val;
-
       // 生成token
       const token = Utils.generateToken(uid);
-
-      ctx.body = { ...Tips[1001], data: { user: name, token } };
+      ctx.body = { ...Tips[1001], data: { user: name, uid, token } };
     } catch (e) {
-      console.log(e);
       ctx.body = Tips[1002];
     }
   }
@@ -45,7 +63,7 @@ module.exports = class user {
     const value = [username, md5(password), functions.formatDate()];
     const sql = `INSERT INTO user(username,password,create_time) VALUES(?,?,?)`
     try {
-      const valid = await db.query(`SELECT username FROM user WHERE username = ?`, [username]);
+      const valid = await formatUser({ username }, ['username']);
 
       if (valid && valid.length) {
         ctx.body = { ...Tips[1007], data: '用户名重复' }
@@ -74,7 +92,7 @@ module.exports = class user {
     if (!valid) return ctx.body = Tips[400]; // 参数错误
     const { uid, password, phone, real_name, sno, gender, avatar } = data;
 
-    const str = Utils.formatStr(['password', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'update_time']);
+    const str = Utils.updateFormatStr(['password', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'update_time']);
     try {
       // 查找uid是否有
       await db.query('SELECT uid FROM user WHERE uid=? ', [uid]);
@@ -86,5 +104,25 @@ module.exports = class user {
       ctx.body = Tips[1002];
     }
 
+  }
+
+  // 查询用户资料
+  static async userInfo(ctx) {
+    const data = Utils.filter(ctx, ['uid']);
+    const valid = Utils.formatData(data, { uid: 'number' });
+    if (!valid) return ctx.body = Tips[400];
+    const { uid } = data;
+    try {
+      const sql = `SELECT * FROM user WHERE uid=?`;
+      let res = await db.query(sql, [uid]);
+      res = functions.splitData(res, ['password']);
+
+      ctx.body = {
+        ...Tips[1001],
+        data: res
+      }
+    } catch (e) {
+      ctx.body = Tips[1002];
+    }
   }
 }

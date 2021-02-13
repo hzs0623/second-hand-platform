@@ -18,18 +18,23 @@ function logger() {
 function checkToken() {
   return async (ctx, next) => {
     let { url = '' } = ctx;
-    const notUrlMap = ['/login', '/register'];
+    const notUrlMap = ['/login', '/register']; // 不需要校验接口
 
-    if (notUrlMap.indexOf(url) === -1) {//需要校验登录态
-      const { authtoken = "" } = ctx.request.header || {};
-      if (!authtoken) return ctx.body = Tips[1005];
-      const uid = Utils.verifyToken(authtoken) || "";
-      if (!uid) return ctx.body = Tips[1005];
-      ctx.state = { uid }; // state能获取uid值
-      await next();
-    } else {
-      // login 和 注册 不需要校验token
-      await next();
+    const isValid = notUrlMap.some(str => url.indexOf(str) === 0);
+    try {
+      if (!isValid) {//需要校验登录态
+        const { authtoken = "" } = ctx.request.header || {};
+        if (!authtoken) return ctx.body = Tips[1005];
+        const uid = await Utils.verifyToken(authtoken) || "";
+        console.log(uid);
+        ctx.state = { uid }; // state能获取uid值
+        await next();
+      } else {
+        // login 和 注册 不需要校验token
+        await next();
+      }
+    } catch (e) {
+      ctx.body = Tips[1005];
     }
   }
 }

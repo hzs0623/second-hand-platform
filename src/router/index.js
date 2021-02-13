@@ -17,6 +17,7 @@ router.get('/', (ctx, next) => {
 router.post('/login', User.login);
 router.post('/register', User.registerUser);
 router.post('/user/edit', User.userEdit);
+router.get('/user/find', User.userInfo);
 
 router.get('/shop/list', shopList.getList);
 
