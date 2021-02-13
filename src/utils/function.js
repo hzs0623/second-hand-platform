@@ -31,7 +31,19 @@ function splitData(params, origins) {
   })
   return params;
 }
+
+function getUpdateStr(arr) {
+  if (Object.prototype.toString.call(arr) === '[object Object]') {
+    arr = Object.values(arr);
+  }
+  const newArr = arr.map(_ => {
+    return '?'
+  })
+  return newArr.join();
+}
+
 module.exports = {
   formatDate,
-  splitData
+  splitData,
+  getUpdateStr
 }

@@ -17,6 +17,9 @@ const pool = mysql.createPool(config);
  * value: 查询值
 */
 const query = (sql, values) => {
+  if (Object.prototype.toString.call(values) === '[object Object]') {
+    values = Object.values(values);
+  }
   return new Promise((resolve, reject) => {
     pool.getConnection((err, connection) => {
       if (err) return reject(err);
