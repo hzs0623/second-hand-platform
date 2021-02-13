@@ -2,8 +2,8 @@ const Koa = require('koa');
 const app = new Koa();
 const router = require('./src/router');
 const bodyParser = require('koa-bodyparser');
-const { logger, checkToken } = require('./src/middleware'); // 自定义中间件
-const cors = require('./src/libs/koa-cors');
+const { logger, checkToken } = require('./middleware'); // 自定义中间件
+const cors = require('./libs/koa-cors');
 
 app.use(cors); // 跨站资源共享
 app.use(bodyParser()); // post处理

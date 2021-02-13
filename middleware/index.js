@@ -1,4 +1,4 @@
-const { Utils, Tips } = require('../utils');
+const { Utils, Tips } = require('../src/utils');
 
 /**
  * 执行连接时间
@@ -26,7 +26,6 @@ function checkToken() {
         const { authtoken = "" } = ctx.request.header || {};
         if (!authtoken) return ctx.body = Tips[1005];
         const uid = await Utils.verifyToken(authtoken) || "";
-        console.log(uid);
         ctx.state = { uid }; // state能获取uid值
         await next();
       } else {

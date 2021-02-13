@@ -1,4 +1,3 @@
-const Tips = require('./tip');
 const IS = require('is');
 const fs = require('fs');
 const path = require('path');
@@ -69,7 +68,7 @@ module.exports = {
   generateToken(data) {
     if (!data) return data;
     let created = Date.now() + 24 * 3600 * 1000; // 一天
-    let cert = fs.readFileSync(path.join(__dirname, '../config/pri.pem'));
+    let cert = fs.readFileSync(path.join(__dirname, '../../config/pri.pem'));
     let token = jwt.sign({
       data,
       iat: created // 过期时间  
@@ -82,7 +81,7 @@ module.exports = {
   verifyToken(token) {
     return new Promise((resolve, reject) => {
       try {
-        const cert = fs.readFileSync(path.join(__dirname, '../config/pub.pem'));
+        const cert = fs.readFileSync(path.join(__dirname, '../../config/pub.pem'));
         let result = jwt.verify(token, cert, { algorithms: ['RS256'] }) || {};
         let { iat = 0 } = result, current = Date.now();
 
