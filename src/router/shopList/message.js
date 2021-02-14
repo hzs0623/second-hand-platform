@@ -14,14 +14,18 @@ module.exports = {
       content: 'string'
     });
     if (!valid) return ctx.body = Tips[400];
-
+    let { content } = data;
+    content = content.trim();
+    if (!content) {
+      ctx.body = Tips[1002]
+      return
+    }
     try {
       let str = Object.keys(data);
       const sql = `INSERT INTO ${table}(${str.join()},create_time) VALUES(${functions.getUpdateStr(data)},?)`;
-      await db.query(sql, { ...data, 'create_time': Date.now() });
+      await db.query(sql, { ...data, content, 'create_time': Date.now() });
       ctx.body = Tips[1001];
     } catch (e) {
-      console.log(e)
       ctx.body = Tips[1002];
     }
   },

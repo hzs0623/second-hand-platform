@@ -4,8 +4,9 @@ const { Utils, Tips } = require('../src/utils');
 const path = require('path');
 const fs = require('fs');
 const mimeTypes = require('mime-types');
+
 // 跳过校验接口地址
-const notUrlMap = ['/login', '/register', '/public/images'];
+const notUrlMap = ['/login', '/register', '/public/images', '/shop/list', '/init/map', '/shop/get/message', '/shop/item', '/public/upload'];
 /**
  * 执行连接时间
 */
@@ -45,11 +46,14 @@ function checkToken() {
 function images() {
   return async (ctx, next) => {
     const { url } = ctx;
-    if (url.indexOf('/public/images') === -1) {
+    const publicMap = ['/public/upload', '/public/images'];
+
+    const isPublic = publicMap.some(path => url.indexOf(path) !== -1);
+
+    if (!isPublic) {
       await next();
       return;
     }
-
     try {
       let filePath = path.join(__dirname, ctx.url); //图片地址
       filePath = filePath.replace(/\/middleware/, "");
@@ -57,8 +61,6 @@ function images() {
       let mimeType = mimeTypes.lookup(filePath); //读取图片文件类型
       ctx.set('content-type', mimeType); //设置返回类型
       ctx.body = file; //返回图片
-
-      // http://127.0.0.1:3333/public/images/default.png
     } catch (e) {
       ctx.body = Tips[1002];
     }
