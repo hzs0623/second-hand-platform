@@ -60,8 +60,8 @@ module.exports = class user {
     if (!valid) return ctx.body = Tips[400]; // 参数错误
 
     const { username, password } = data;
-    const value = [username, md5(password), functions.formatDate()];
-    const sql = `INSERT INTO user(username,password,create_time) VALUES(?,?,?)`
+    const value = [username, md5(password), Date.now(), Date.now()];
+    const sql = `INSERT INTO user(username,password,create_time, update_time) VALUES(?,?,?,?)`
     try {
       const valid = await formatUser({ username }, ['username']);
 
@@ -79,10 +79,10 @@ module.exports = class user {
 
   // 修改信息
   static async userEdit(ctx) {
-    const data = Utils.filter(ctx, ['uid', 'password', 'phone', 'real_name', 'sno', 'gender', 'avatar']);
+    const data = Utils.filter(ctx, ['uid', 'username', 'phone', 'real_name', 'sno', 'gender', 'avatar']);
     const valid = Utils.formatData(data, {
       uid: "number",
-      password: "string",
+      username: 'string',
       phone: 'number',
       real_name: 'string',
       sno: 'number',
@@ -90,14 +90,15 @@ module.exports = class user {
       avatar: 'string'
     });
     if (!valid) return ctx.body = Tips[400]; // 参数错误
-    const { uid, password, phone, real_name, sno, gender, avatar } = data;
+    const { uid, username, phone, real_name, sno, gender, avatar = '' } = data;
 
-    const str = Utils.updateFormatStr(['password', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'update_time']);
+    const str = Utils.updateFormatStr(['username', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'update_time']);
     try {
       // 查找uid是否有
       await db.query('SELECT uid FROM user WHERE uid=? ', [uid]);
+
       let sqlUp = `UPDATE user SET ${str} WHERE uid = ?`;
-      let modSqlParams = [md5(password), phone, real_name, sno, gender, avatar, functions.formatDate(), uid];
+      let modSqlParams = [username, phone, real_name, sno, gender, avatar, Date.now(), uid];
       await db.query(sqlUp, modSqlParams);
       ctx.body = { ...Tips[1001], data: 'edit user info success' };
     } catch (e) {

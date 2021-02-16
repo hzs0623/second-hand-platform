@@ -44,7 +44,12 @@ module.exports = {
           if (!IS.string(value)) {
             res = true;
           }
-          break
+          break;
+        case 'array':
+          if (!IS.array(value)) {
+            res = true
+          }
+          break;
         default:
           res = false;
           break;

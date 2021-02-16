@@ -4,6 +4,8 @@ const shopList = require('./shopList'); // 商品
 const init = require('./init');  // 映射数据
 const message = require('./shopList/message');  // 商品留言
 const upload = require('./upload'); // 上传接口
+const shopCart = require('./shopCart'); // 购物车
+const buyShop = require('./shopCart/buyShop');
 
 const router = new Router();
 
@@ -17,6 +19,7 @@ router.get('/', (ctx, next) => {
 })
 // map映射
 router.get('/init/map', init.getInit);
+router.get('/init/user/map', init.getUsernameList);  // 用户姓名列表
 
 // 用户
 router.post('/login', User.login);
@@ -31,6 +34,7 @@ router.post('/shop/add', shopList.addShop); // 增加商品 getByIdShopList
 router.post('/shop/delete', shopList.deleteShop); // 获取单个商品信息
 router.get('/shop/uid/list', shopList.getByIdShopList); // 获取单个商品信息
 router.post('/shop/edit', shopList.editShop); // 商品信息修改 
+router.post('/shop/edit/state', shopList.editShopState); // 下架
 
 // 商品留言
 router.post('/shop/add/message', message.addShopMesg);
@@ -39,5 +43,12 @@ router.post('/shop/delete/message', message.deleteShopMessage); // 删除留言
 
 // 上传接口
 router.post('/upload/image', upload.uploadImg);
+
+// 购物车
+router.post('/shop/cart/add', shopCart.addShopCart); // 添加购物车
+router.get('/shop/cart/list', shopCart.getShopCart); // 查询购物车列表  
+router.post('/shop/cart/delete', shopCart.deleteShopCart); // 删除购物车
+router.get('/buy/shop/list', buyShop.getbuyShopList); // 已买的商品 
+router.post('/payment/shop', buyShop.paymentShop); // 购买商品 
 
 module.exports = router;

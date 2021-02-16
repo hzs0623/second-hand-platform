@@ -6,7 +6,7 @@ const fs = require('fs');
 const mimeTypes = require('mime-types');
 
 // 跳过校验接口地址
-const notUrlMap = ['/login', '/register', '/public/images', '/shop/list', '/init/map', '/shop/get/message', '/shop/item', '/public/upload'];
+const notUrlMap = ['/login', '/register', '/public', '/init', '/shop/list', '/shop/get/message', '/shop/item',];
 /**
  * 执行连接时间
 */

@@ -19,13 +19,12 @@ module.exports = {
 
       let { curPage, pageSize, } = data;
       curPage = (Number(curPage) - 1) * pageSize;
+      const sql = `SELECT * FROM ${table} WHERE display=1 limit ${curPage}, ${pageSize}`;
 
-      const sql = `SELECT * FROM ${table} limit ${curPage}, ${pageSize}`
-      const lists = await db.query(`SELECT COUNT(id) FROM shop_list`);
-      const total = lists.length ? lists[0]['COUNT(id)'] : 0;
-      const res = await db.query(sql) || [];
-
-      ctx.body = { ...Tips[1001], data: { list: res, total } };
+      const lists = await db.query(`SELECT COUNT(*) FROM ${table}  where display=1`);
+      const total = lists.length ? lists[0]['COUNT(*)'] : 0;
+      let list = await db.query(sql) || []; // 总列表
+      ctx.body = { ...Tips[1001], data: { list, total } };
     } catch (e) {
       ctx.body = Tips[1002];
     }
@@ -38,15 +37,15 @@ module.exports = {
     const data = Utils.filter(ctx, ['id']);
     const valid = Utils.formatData(data, { id: 'number' });
     if (!valid) return ctx.body = Tips[400];
-    const { id } = data;
+    const { id } = data; // 商品id
     try {
       let res = await db.query(`SELECT * FROM ${table} WHERE id=?`, [id]);
       res = res[0];
+      // 每次请求增加浏览次数
       let { browse_num } = res;
       browse_num = Number(browse_num) + 1;
-      const str = Utils.updateFormatStr(['browse_num']);
-      let sqlUp = `UPDATE ${table} SET ${str} WHERE id = ?`;
-      await db.query(sqlUp, [browse_num, id]); // 每次请求增加浏览次数
+      let sqlUp = `UPDATE ${table} SET browse_num=? WHERE id = ?`;
+      await db.query(sqlUp, [browse_num, id]);
 
       ctx.body = {
         ...Tips[1001],
@@ -79,7 +78,7 @@ module.exports = {
     if (!valid) return ctx.body = Tips[400];
 
     try {
-      const sql = `INSERT INTO ${table}(${Object.keys(data).join()},create_time) VALUES(${functions.getUpdateStr(data)}, ${Date.now()})`;
+      const sql = `INSERT INTO ${table}(${Object.keys(data).join()},create_time,update_time) VALUES(${functions.getUpdateStr(data)}, ${Date.now()}, ${Date.now()})`;
       await db.query(sql, data);
       ctx.body = Tips[1001];
     } catch (e) {
@@ -162,7 +161,28 @@ module.exports = {
 
       let modSqlParams = [title, level, price, count, image, sort, information, Date.now(), id];
       await db.query(sqlUp, modSqlParams);
-      ctx.body = { ...Tips[1001], data: 'edit user info success' };
+      ctx.body = { ...Tips[1001], data: 'edit shop info success' };
+    } catch (e) {
+      ctx.body = Tips[1002];
+    }
+  },
+
+  /**
+   * 修改商品状态
+  */
+  async editShopState(ctx) {
+    const data = Utils.filter(ctx, ['id', 'uid', 'display']);
+    const valid = Utils.formatData(data, {
+      id: 'number',
+      uid: 'number',
+      display: 'number'
+    });
+    if (!valid) return ctx.body = Tips[400];
+    const { id, uid, display } = data;
+    try {
+      let sqlUp = `UPDATE ${table} SET display=? WHERE id = ? and uid = ?`;
+      await db.query(sqlUp, [display, id, uid]);
+      ctx.body = { ...Tips[1001], data: 'edit shopping state success' };
     } catch (e) {
       ctx.body = Tips[1002];
     }
