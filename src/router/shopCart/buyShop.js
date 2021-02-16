@@ -47,21 +47,33 @@ module.exports = {
   },
   // 获取购买的商品列表
   async getbuyShopList(ctx) {
-    const data = Utils.filter(ctx, ['uid', 'sid']);
+    const data = Utils.filter(ctx, ['uid']);
     const valid = Utils.formatData(data, {
-      uid: 'number',
-      sid: 'number'
+      uid: 'number'
     });
     if (!valid) return ctx.body = Tips[400];
 
     try {
-      let findSql = `SELECT * FROM ${table} WHERE uid=? and sid=?`;
-      const { uid, sid } = data;
-      const res = await db.query(findSql, [uid, sid]);
+      let findSql = `SELECT * FROM ${table} WHERE uid=? and state=1`;
+      const { uid } = data;
+      const shopLists = await db.query(findSql, [uid]);
+      let list = [];
+      if (shopLists.length) {
+        for (let i = 0; i < shopLists.length; i++) {
+          const { sid, state, create_time, shop_count } = shopLists[i];
+
+          // 查找相应商品
+          const shops = await db.query(`SELECT title,price,image,level,information,count FROM shop_list WHERE id=?`, [sid]);
+          const { title, price, image, level, information, count } = shops[0];
+          list.push({
+            title, price, image, level, information, count, state, create_time, shop_count
+          })
+        }
+      }
       ctx.body = {
         ...Tips[1001],
         data: {
-          list: res
+          list
         }
       }
     } catch (e) {

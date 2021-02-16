@@ -1,5 +1,11 @@
 const { Utils, Tips, functions } = require('../../utils');
 const db = require('../../db');
+const { bashUrl, upload_url } = require('../../utils/var');
+const fs = require('fs');
+const path = require('path');
+
+const uploadUrl = path.resolve(__dirname, 'public/upload').replace('/src/router/shopList', "");
+console.log(uploadUrl)
 
 const table = 'shop_list';
 
@@ -91,15 +97,22 @@ module.exports = {
   */
   async deleteShop(ctx) {
     try {
-      const data = Utils.filter(ctx, ['id']);
+      const data = Utils.filter(ctx, ['id', 'uid']);
       const valid = Utils.formatData(data, {
-        id: 'number'
+        id: 'number',
+        uid: 'number',
       });
       if (!valid) return ctx.body = Tips[400];
+      const { id, uid } = data;
 
-      let sql = `DELETE FROM ${table} where id=?`;
-      const { id } = data;
-      await db.query(sql, [id]);
+      // 删除本地图片
+      const lists = await db.query(`SELECT image FROM ${table} WHERE id=? and uid=?`, [id, uid]);
+      const { image } = lists[0];
+      const imgUrl = image.replace(`${bashUrl}${upload_url}`, "");
+
+      fs.unlink(`${uploadUrl}/${imgUrl}`, (e) => { }); // 删除图片
+      let sql = `DELETE FROM ${table} where id=? and uid=?`;
+      await db.query(sql, [id, uid]);
       ctx.body = Tips[1001];
     } catch (e) {
       ctx.body = Tips[1002];
@@ -186,5 +199,31 @@ module.exports = {
     } catch (e) {
       ctx.body = Tips[1002];
     }
+  },
+
+  /**
+   * 商品搜索
+  */
+  async shopSearch(ctx) {
+    const data = Utils.filter(ctx, ['title']);
+    const valid = Utils.formatData(data, {
+      title: 'string',
+    });
+
+    if (!valid) return ctx.body = Tips[400];
+    try {
+      const { title } = data;
+      const findSql = `select * from ${table} where title like '%${title}%'`;
+      const res = await db.query(findSql);
+      ctx.body = {
+        ...Tips[1001],
+        data: {
+          list: res
+        }
+      }
+    } catch (error) {
+      ctx.body = Tips[1002]
+    }
+
   }
 } 

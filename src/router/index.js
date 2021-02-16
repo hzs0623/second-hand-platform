@@ -35,6 +35,7 @@ router.post('/shop/delete', shopList.deleteShop); // 获取单个商品信息
 router.get('/shop/uid/list', shopList.getByIdShopList); // 获取单个商品信息
 router.post('/shop/edit', shopList.editShop); // 商品信息修改 
 router.post('/shop/edit/state', shopList.editShopState); // 下架
+router.get('/shop/search', shopList.shopSearch); // 商品搜索 标题
 
 // 商品留言
 router.post('/shop/add/message', message.addShopMesg);
