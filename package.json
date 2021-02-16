@@ -1,9 +1,9 @@
 {
-  "name": "demo",
-  "version": "1.0.0",
+  "name": "node-koa",
+  "version": "1.0.1",
   "main": "index.js",
   "repository": "",
-  "author": "",
+  "author": "daes",
   "license": "MIT",
   "dependencies": {
     "is": "^3.3.0",
