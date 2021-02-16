@@ -6,6 +6,7 @@ const message = require('./shopList/message');  // 商品留言
 const upload = require('./upload'); // 上传接口
 const shopCart = require('./shopCart'); // 购物车
 const buyShop = require('./shopCart/buyShop');
+const order = require('./order');
 
 const router = new Router();
 
@@ -51,5 +52,9 @@ router.get('/shop/cart/list', shopCart.getShopCart); // 查询购物车列表
 router.post('/shop/cart/delete', shopCart.deleteShopCart); // 删除购物车
 router.get('/buy/shop/list', buyShop.getbuyShopList); // 已买的商品 
 router.post('/payment/shop', buyShop.paymentShop); // 购买商品 
+
+// 订单
+router.get('/order/list', order.getOrderList);
+router.post('/order/edit', order.orderEdit);
 
 module.exports = router;

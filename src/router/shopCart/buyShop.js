@@ -7,21 +7,24 @@ const table = `buy_shop`; // 映射map
 module.exports = {
   // 购买商品
   async paymentShop(ctx) {
-    const data = Utils.filter(ctx, ['uid', 'shopList']);
+    const data = Utils.filter(ctx, ['uid', 'shopList', 'buy_method']);
     const valid = Utils.formatData(data, {
       uid: 'number',
-      shopList: 'array'
+      shopList: 'array',
+      buy_method: 'number', // 支付方式
     });
     if (!valid) return ctx.body = Tips[400];
 
     try {
-      const { uid, shopList } = data;
+      const { uid, shopList, buy_method } = data;
       for (let i = 0; i < shopList.length; i++) {
         const item = shopList[i];
         const { sid, shop_count, state } = item || {};
-        let addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, create_time, update_time) VALUES(?,?,?,?,?,?)`;
+        let addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, buy_method,create_time, update_time) VALUES(?,?,?,?,?,?,?)`;
 
-        await db.query(addSql, [uid, sid, shop_count, state, Date.now(), Date.now()]);
+        // 添加商品
+        await db.query(addSql, [uid, sid, shop_count, state, buy_method, Date.now(), Date.now()]);
+
         // 删除购物车里商品
         const deteleSql = `DELETE FROM shop_cart WHERE uid=? and sid=? `;
         await db.query(deteleSql, [uid, sid]);
@@ -54,19 +57,20 @@ module.exports = {
     if (!valid) return ctx.body = Tips[400];
 
     try {
-      let findSql = `SELECT * FROM ${table} WHERE uid=? and state=1`;
+      let findBuySql = `SELECT * FROM ${table} WHERE uid=?`;
       const { uid } = data;
-      const shopLists = await db.query(findSql, [uid]);
+      const shopLists = await db.query(findBuySql, [uid]);
       let list = [];
       if (shopLists.length) {
         for (let i = 0; i < shopLists.length; i++) {
-          const { sid, state, create_time, shop_count } = shopLists[i];
+          const { sid, state, create_time, shop_count, buy_method } = shopLists[i];
 
           // 查找相应商品
-          const shops = await db.query(`SELECT title,price,image,level,information,count FROM shop_list WHERE id=?`, [sid]);
-          const { title, price, image, level, information, count } = shops[0];
+          const shops = await db.query(`SELECT uid,title,price,image,level,information,count FROM shop_list WHERE id=?`, [sid]);
+          const { uid: shop_uid, title, price, image, level, information, count } = shops[0];
           list.push({
-            title, price, image, level, information, count, state, create_time, shop_count
+            sid,
+            title, price, image, level, information, count, state, create_time, shop_count, buy_method, uid: shop_uid
           })
         }
       }

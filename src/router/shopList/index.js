@@ -4,8 +4,7 @@ const { bashUrl, upload_url } = require('../../utils/var');
 const fs = require('fs');
 const path = require('path');
 
-const uploadUrl = path.resolve(__dirname, 'public/upload').replace('/src/router/shopList', "");
-console.log(uploadUrl)
+const uploadUrl = path.resolve(__dirname, 'public/upload').replace('/src/router/shopList', ""); // 上传地址
 
 const table = 'shop_list';
 
@@ -27,8 +26,8 @@ module.exports = {
       curPage = (Number(curPage) - 1) * pageSize;
       const sql = `SELECT * FROM ${table} WHERE display=1 limit ${curPage}, ${pageSize}`;
 
-      const lists = await db.query(`SELECT COUNT(*) FROM ${table}  where display=1`);
-      const total = lists.length ? lists[0]['COUNT(*)'] : 0;
+      const lists = await db.query(`SELECT COUNT(id) FROM ${table}  where display=1`);
+      const total = lists.length ? lists[0]['COUNT(id)'] : 0;
       let list = await db.query(sql) || []; // 总列表
       ctx.body = { ...Tips[1001], data: { list, total } };
     } catch (e) {
@@ -170,7 +169,7 @@ module.exports = {
 
       const { title, level, price, count, image, sort, information, id } = data;
       const str = Utils.updateFormatStr(['title', 'level', 'price', 'count', 'image', 'sort', 'information', 'update_time']);
-      let sqlUp = `UPDATE ${table} SET ${str} WHERE id = ?`;
+      let sqlUp = `UPDATE ${table} SET ${str},display=1 WHERE id = ?`;
 
       let modSqlParams = [title, level, price, count, image, sort, information, Date.now(), id];
       await db.query(sqlUp, modSqlParams);

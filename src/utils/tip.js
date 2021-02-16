@@ -6,7 +6,8 @@ module.exports = {
   },
   1001: {
     code: 1001,
-    msg: 'success!'
+    msg: 'success!',
+    data: 'success'
   },
   1002: {
     code: 1002,
