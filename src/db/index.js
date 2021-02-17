@@ -3,11 +3,11 @@
 const mysql = require('mysql');
 
 const config = {
-  host: '159.75.102.92',
-  user: 'root',
-  password: 'CQGCXYbysj',
+  host: '121.4.113.48',
+  user: 'daes',
+  password: 'Hzs980623',
   database: 'daes', // 数据库
-  port: 3306,
+  port: 8899,
   multipleStatements: true//允许多条sql同时执行
 }
 const pool = mysql.createPool(config);

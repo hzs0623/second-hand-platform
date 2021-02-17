@@ -29,19 +29,23 @@ module.exports = {
       for (let i = 0; i < shopLists.length; i++) {
         const { id: sid, title, price, sort, image, information } = shopLists[i]; // 商品信息
         const buyItem = await db.query(`SELECT * FROM ${buyTable} WHERE sid`, [sid]);
-        const { uid: buyId = '', buy_method = '', shop_count = '', state = '' } = buyItem.length && buyItem[0];
-        list.push({
-          buy_uid: buyId, // 购买人id，
-          buy_method,
-          title,
-          sid,
-          price,
-          sort,
-          image,
-          shop_count,
-          state,
-          information
+
+        buyItem.forEach(item => {
+          const { uid: buyId = '', buy_method = '', shop_count = '', state = '' } = item;
+          list.push({
+            buy_uid: buyId, // 购买人id，
+            buy_method,
+            title,
+            sid,
+            price,
+            sort,
+            image,
+            shop_count,
+            state,
+            information
+          })
         })
+
       }
       ctx.body = {
         ...Tips[1001],
