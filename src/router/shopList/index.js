@@ -105,11 +105,12 @@ module.exports = {
       const { id, uid } = data;
 
       // 删除本地图片
-      const lists = await db.query(`SELECT image FROM ${table} WHERE id=? and uid=?`, [id, uid]);
-      const { image } = lists[0];
-      const imgUrl = image.replace(`${bashUrl}${upload_url}`, "");
+      // const lists = await db.query(`SELECT image FROM ${table} WHERE id=? and uid=?`, [id, uid]);
+      // const { image } = lists[0];
+      // const imgUrl = image.replace(`${bashUrl}${upload_url}`, "");
+      // fs.unlink(`${uploadUrl}/${imgUrl}`, (e) => { }); // 删除图片
 
-      fs.unlink(`${uploadUrl}/${imgUrl}`, (e) => { }); // 删除图片
+
       let sql = `DELETE FROM ${table} where id=? and uid=?`;
       await db.query(sql, [id, uid]);
       ctx.body = Tips[1001];

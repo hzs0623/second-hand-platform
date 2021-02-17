@@ -1,10 +1,11 @@
-const { Utils, Tips, functions } = require('../../utils');
+const { Tips, } = require('../../utils');
 const db = require('../../db');
+const { ossConfig } = require('../../utils/var');
 
 const table = `init_map`; // 映射map
 
 module.exports = {
-  // 查询
+  // 查询各个map
   async getInit(ctx) {
     const sql = `SELECT * FROM ${table}`;
     try {
@@ -35,6 +36,16 @@ module.exports = {
       }
     } catch (e) {
       ctx.body = Tips[1002];
+    }
+  },
+
+  // oss配置
+  async getOssConfig(ctx) {
+    ctx.body = {
+      ...Tips[1001],
+      data: {
+        ossConfig
+      }
     }
   }
 }

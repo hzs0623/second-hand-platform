@@ -1,15 +1,8 @@
 //职责： 数据库
 
 const mysql = require('mysql');
+const config = require('../../config/dbConfig');
 
-const config = {
-  host: '121.4.113.48',
-  user: 'daes',
-  password: 'Hzs980623',
-  database: 'daes', // 数据库
-  port: 8899,
-  multipleStatements: true//允许多条sql同时执行
-}
 const pool = mysql.createPool(config);
 
 /**
