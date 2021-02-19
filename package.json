@@ -19,6 +19,7 @@
     "dev": "nodemon ./bin/www"
   },
   "devDependencies": {
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "qcloud-cos-sts": "^3.0.2"
   }
 }

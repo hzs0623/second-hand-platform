@@ -1,6 +1,5 @@
-const { Tips, functions } = require('../../utils');
-const { bashUrl, upload_url } = require('../../utils/var');
-const path = require('path');
+const { Tips } = require('../../utils');
+const { bashUrl, upload_url } = require('../../constant');
 
 module.exports = {
   // 上传图片

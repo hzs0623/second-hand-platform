@@ -1,5 +1,5 @@
 // 购买的商品
-const { Utils, Tips, functions } = require('../../utils');
+const { Utils, Tips } = require('../../utils');
 const db = require('../../db');
 
 const table = `buy_shop`; // 映射map

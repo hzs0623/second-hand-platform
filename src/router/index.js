@@ -21,7 +21,7 @@ router.get('/', (ctx, next) => {
 // map映射
 router.get('/init/map', init.getInit);
 router.get('/init/user/map', init.getUsernameList);  // 用户姓名列表 
-router.get('/init/oss/config', init.getOssConfig); // 获取配置
+router.get('/oss/config', init.getOssConfig); // 获取oss配置
 
 // 用户
 router.post('/login', User.login);

@@ -1,7 +1,6 @@
-const { Tips, } = require('../../utils');
+const { Tips } = require('../../utils');
 const db = require('../../db');
-const { ossConfig } = require('../../utils/var');
-
+const getOss = require('../../sdk');
 const table = `init_map`; // 映射map
 
 module.exports = {
@@ -41,11 +40,14 @@ module.exports = {
 
   // oss配置
   async getOssConfig(ctx) {
-    ctx.body = {
-      ...Tips[1001],
-      data: {
-        ossConfig
+    try {
+      const data = await getOss.getCredential(ctx.query);
+      ctx.body = {
+        ...Tips[1001],
+        data
       }
+    } catch (e) {
+      ctx.body = Tips[1002];
     }
   }
 }

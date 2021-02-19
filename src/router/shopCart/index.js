@@ -1,5 +1,5 @@
 // 职责： 购物车
-const { Utils, Tips, functions } = require('../../utils');
+const { Utils, Tips } = require('../../utils');
 const db = require('../../db');
 
 const table = `shop_cart`; // 映射map

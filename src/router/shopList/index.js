@@ -1,10 +1,5 @@
 const { Utils, Tips, functions } = require('../../utils');
 const db = require('../../db');
-const { bashUrl, upload_url } = require('../../utils/var');
-const fs = require('fs');
-const path = require('path');
-
-const uploadUrl = path.resolve(__dirname, 'public/upload').replace('/src/router/shopList', ""); // 上传地址
 
 const table = 'shop_list';
 
@@ -12,7 +7,7 @@ module.exports = {
   /**
    * 获取商品列表
   */
-  async getList(ctx, next) {
+  async getList(ctx) {
     try {
       // 过滤一下参数
       const data = Utils.filter(ctx, ['pageSize', 'curPage']);
@@ -103,13 +98,6 @@ module.exports = {
       });
       if (!valid) return ctx.body = Tips[400];
       const { id, uid } = data;
-
-      // 删除本地图片
-      // const lists = await db.query(`SELECT image FROM ${table} WHERE id=? and uid=?`, [id, uid]);
-      // const { image } = lists[0];
-      // const imgUrl = image.replace(`${bashUrl}${upload_url}`, "");
-      // fs.unlink(`${uploadUrl}/${imgUrl}`, (e) => { }); // 删除图片
-
 
       let sql = `DELETE FROM ${table} where id=? and uid=?`;
       await db.query(sql, [id, uid]);

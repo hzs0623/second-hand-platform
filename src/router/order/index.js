@@ -1,6 +1,5 @@
-const { Utils, Tips, functions } = require('../../utils');
+const { Utils, Tips } = require('../../utils');
 const db = require('../../db');
-const buyShop = require('../shopCart/buyShop');
 
 const shopTable = `shop_list`;
 const buyTable = `buy_shop`;
