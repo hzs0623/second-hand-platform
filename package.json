@@ -16,7 +16,7 @@
     "nodemon": "^2.0.7"
   },
   "scripts": {
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon app.js"
   },
   "devDependencies": {
     "mysql": "^2.18.1",

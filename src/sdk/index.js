@@ -1,21 +1,20 @@
 const STS = require('qcloud-cos-sts');
 const ossConfig = require('../../config/ossConfig');
 
-const file = `shop/image`; // 存入地址
-// 配置参数
-const config = {
-  secretId: ossConfig.secretId,   // 固定密钥
-  secretKey: ossConfig.secretKey,  // 固定密钥
-  proxy: '',
-  durationSeconds: 1800,  // 密钥有效期 
-  // 放行判断相关参数
-  bucket: ossConfig.bucket,
-  region: ossConfig.region, // 换成 bucket 所在地区
-  allowPrefix: file
-};
-
 //  牛逼 🐂
 const getCredential = (query = {}) => {
+  const { key } = query;
+  // 配置参数
+  const config = {
+    secretId: ossConfig.secretId,   // 固定密钥
+    secretKey: ossConfig.secretKey,  // 固定密钥
+    proxy: '',
+    durationSeconds: 1800,  // 密钥有效期 
+    // 放行判断相关参数
+    bucket: ossConfig.bucket,
+    region: ossConfig.region, // 换成 bucket 所在地区
+    allowPrefix: key
+  };
   return new Promise((resovle, reject) => {
     const shortBucketName = config.bucket.substr(0, config.bucket.lastIndexOf('-'));
     const appId = config.bucket.substr(1 + config.bucket.lastIndexOf('-'));
