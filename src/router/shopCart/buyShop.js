@@ -7,20 +7,21 @@ const table = `buy_shop`; // 映射map
 module.exports = {
   // 购买商品
   async paymentShop(ctx) {
-    const data = Utils.filter(ctx, ['uid', 'shopList', 'buy_method']);
+    const data = Utils.filter(ctx, ['uid', 'shopList', 'buy_method', 'shipping_address', 'phone']);
     const valid = Utils.formatData(data, {
       uid: 'number',
       shopList: 'array',
       buy_method: 'number', // 支付方式
+      shipping_address: 'string', // 收货地址
+      phone: 'number',
     });
     if (!valid) return ctx.body = Tips[400];
 
     try {
-      const { uid, shopList, buy_method } = data;
+      const { uid, shopList, buy_method, shipping_address = '', phone = "" } = data;
       for (let i = 0; i < shopList.length; i++) {
         const item = shopList[i];
         const { sid, shop_count, state } = item || {};
-        let addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, buy_method,create_time, update_time) VALUES(?,?,?,?,?,?,?)`;
 
         // 改变商品列表为被购买状态
         const shops = await db.query(`SELECT count,display FROM shop_list WHERE id=${sid}`);
@@ -32,7 +33,9 @@ module.exports = {
         }
 
         // 添加商品
-        await db.query(addSql, [uid, sid, shop_count, state, buy_method, Date.now(), Date.now()]);
+        const addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, buy_method,shipping_address,phone,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?)`;
+
+        await db.query(addSql, [uid, sid, shop_count, state, buy_method, shipping_address, phone, Date.now(), Date.now()]);
 
         // 删除购物车里商品
         const deteleSql = `DELETE FROM shop_cart WHERE uid=? and sid=? `;

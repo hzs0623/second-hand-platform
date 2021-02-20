@@ -19,21 +19,19 @@ module.exports = {
     let { uid, curPage, pageSize } = data;
 
     curPage = (curPage - 1) * pageSize;
+    let total = 0;
     try {
       // 查询出当前用户发布的商品
       const shopLists = await db.query(`SELECT * FROM ${shopTable} WHERE uid=? and display!=0 limit ${curPage},${pageSize} `, [uid]);
-
-      const lists = await db.query(`SELECT COUNT(id) FROM ${shopTable}  where display!=0 and uid=?`, [uid]);
-      const total = lists.length ? lists[0]['COUNT(id)'] : 0;
 
       let list = [];
       for (let i = 0; i < shopLists.length; i++) {
         const { id: sid, title, price, sort, image, information } = shopLists[i]; // 商品信息
 
         const buyItem = await db.query(`SELECT * FROM ${buyTable} WHERE sid=?`, [sid]);
-
+        buyItem.length && total++
         buyItem.forEach(item => {
-          const { uid: buyId = '', buy_method = '', shop_count = '', state = '' } = item;
+          const { uid: buyId = '', buy_method = '', shop_count = '', state = '', phone = '', shipping_address = "" } = item;
           list.push({
             buy_uid: buyId, // 购买人id，
             buy_method,
@@ -44,7 +42,9 @@ module.exports = {
             image,
             shop_count,
             state,
-            information
+            information,
+            shipping_address,
+            phone
           })
         })
 

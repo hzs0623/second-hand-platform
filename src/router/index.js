@@ -28,6 +28,8 @@ router.post('/login', User.login);
 router.post('/register', User.registerUser);
 router.post('/user/edit', User.userEdit);
 router.get('/user/find', User.userInfo);
+router.post('/uesr/valid', User.userInfoValid); // 用户信息校验
+router.post('/uesr/password', User.userEditPassworde); // 密码修改
 
 // 商品
 router.get('/shop/list', shopList.getList);

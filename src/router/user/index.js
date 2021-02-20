@@ -1,6 +1,7 @@
 const { Utils, Tips, functions } = require('../../utils');
 const md5 = require('md5'); // 加密
 const db = require('../../db');
+const table = `user`;
 
 /**
  * 查询数据库
@@ -34,7 +35,7 @@ module.exports = class user {
       if (!valid) return ctx.body = Tips[400]; // 参数错误
 
       let { username, password } = data;
-      password = md5(password);
+      password = md5(md5(password));
       const isUser = await formatUser({ username, password }, ['username']);
       if (!isUser.length) return ctx.body = Tips[1006];
 
@@ -60,13 +61,13 @@ module.exports = class user {
     if (!valid) return ctx.body = Tips[400]; // 参数错误
 
     const { username, password } = data;
-    const value = [username, md5(password), Date.now(), Date.now()];
+    const value = [username, md5(md5(password)), Date.now(), Date.now()];
     const sql = `INSERT INTO user(username,password,create_time, update_time) VALUES(?,?,?,?)`
     try {
       const valid = await formatUser({ username }, ['username']);
 
       if (valid && valid.length) {
-        ctx.body = { ...Tips[1007], data: '用户名重复' }
+        ctx.body = Tips[1007]
         return;
       }
 
@@ -79,7 +80,7 @@ module.exports = class user {
 
   // 修改信息
   static async userEdit(ctx) {
-    const data = Utils.filter(ctx, ['uid', 'username', 'phone', 'real_name', 'sno', 'gender', 'avatar']);
+    const data = Utils.filter(ctx, ['uid', 'username', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'shipping_address']);
     const valid = Utils.formatData(data, {
       uid: "number",
       username: 'string',
@@ -87,19 +88,26 @@ module.exports = class user {
       real_name: 'string',
       sno: 'number',
       gender: 'number',
-      avatar: 'string'
+      avatar: 'string',
+      shipping_address: 'string'
     });
     if (!valid) return ctx.body = Tips[400]; // 参数错误
-    const { uid, username, phone, real_name, sno, gender, avatar = '' } = data;
 
-    const str = Utils.updateFormatStr(['username', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'update_time']);
     try {
-      // 查找uid是否有
-      await db.query('SELECT uid FROM user WHERE uid=? ', [uid]);
+      const { uid, username, phone, real_name, sno, gender, shipping_address = '', avatar = '' } = data;
 
-      let sqlUp = `UPDATE user SET ${str} WHERE uid = ?`;
-      let modSqlParams = [username, phone, real_name, sno, gender, avatar, Date.now(), uid];
-      await db.query(sqlUp, modSqlParams);
+      // 查找用户名是否重复
+      const validUsername = await db.query(`SELECT uid FROM ${table} WHERE uid!=${uid} and username=?`, [username]);
+
+      if (validUsername && validUsername.length > 0) {
+        ctx.body = Tips[1007]
+        return;
+      }
+
+
+      const str = Utils.updateFormatStr(['username', 'phone', 'real_name', 'sno', 'gender', 'shipping_address', 'avatar', 'update_time']);
+      let sqlUp = `UPDATE ${table} SET ${str} WHERE uid = ?`;
+      await db.query(sqlUp, [username, phone, real_name, sno, gender, shipping_address, avatar, Date.now(), uid]);
       ctx.body = { ...Tips[1001], data: 'edit user info success' };
     } catch (e) {
       ctx.body = Tips[1002];
@@ -123,6 +131,55 @@ module.exports = class user {
         data: res
       }
     } catch (e) {
+      ctx.body = Tips[1002];
+    }
+  }
+
+  // 用户信息校验
+  static async userInfoValid(ctx) {
+    const data = Utils.filter(ctx, ['username', 'phone']);
+    const valid = Utils.formatData(data, {
+      username: 'string',
+      phone: 'number',
+    })
+    if (!valid) return ctx.body = Tips[400];
+
+    try {
+      const { username, phone } = data;
+      // 查询数据库 是否有当前账号 
+      const user = await db.query(`SELECT uid,username FROM ${table} WHERE username=? and phone=?`, [username, phone]);
+      if (user.length === 0) {
+        ctx.body = Tips[1009]; // 账号异常 没有
+        return;
+      }
+
+      ctx.body = {
+        ...Tips[1001],
+        data: {
+          info: user[0]
+        }
+      }
+
+    } catch (error) {
+      ctx.body = Tips[1002];
+    }
+  }
+
+  // 修改密码
+  static async userEditPassworde(ctx) {
+    const data = Utils.filter(ctx, ['uid', 'username', 'password']);
+    const valid = Utils.formatData(data, {
+      username: 'string',
+      password: 'string',
+      uid: 'number',
+    })
+    if (!valid) return ctx.body = Tips[400];
+
+    try {
+      const { username, uid, password } = data;
+      await db.query(`UPDATE ${table} SET password=? WHERE uid = ? and username=?`, [md5(md5(password)), uid, username])
+      ctx.body = Tips[1001];
+    } catch (error) {
       ctx.body = Tips[1002];
     }
   }
