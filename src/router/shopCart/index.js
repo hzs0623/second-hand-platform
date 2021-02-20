@@ -18,8 +18,8 @@ module.exports = {
     try {
       const { sid, uid, shop_count } = data;
       // 先查询一下里面是否有 有就修改
-      const findSql = `SELECT sid from ${table} where sid = ?`;
-      const res = await db.query(findSql, [sid]);
+      const findSql = `SELECT sid,uid from ${table} where sid=? and uid=?`;
+      const res = await db.query(findSql, [sid, uid]);
       if (!res.length) {
         const addSql = `INSERT INTO ${table}(uid,sid,shop_count,create_time, update_time) VALUES(?,?,?,?,?)`
         await db.query(addSql, {
@@ -39,6 +39,7 @@ module.exports = {
   },
   // 查询购物车列表
   async getShopCart(ctx) {
+    // 查询的同时查看商品是否被购买 如果被购买改变状态
     const data = Utils.filter(ctx, ['uid']);
     const valid = Utils.formatData(data, {
       uid: 'number'
@@ -53,7 +54,9 @@ module.exports = {
       for (let i = 0; i < sids.length; i++) {
         const { sid: id, shop_count } = sids[i];
 
-        const shops = await db.query(`SELECT * FROM shop_list WHERE id=? and display=1`, [id]);
+        const shops = await db.query(`SELECT * FROM shop_list WHERE id=?`, [id]);
+        // 这里前端判断状态是否被购买完 如果被购买提示用户下架
+
         const params = {
           ...shops[0],
           shop_count

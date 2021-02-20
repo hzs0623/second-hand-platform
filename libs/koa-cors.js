@@ -1,4 +1,5 @@
 // 职责： 解决跨域
+const originUrl = `http://121.4.113.48`;
 
 module.exports = async (ctx, next) => {
   ctx.set('Access-Control-Allow-Origin', '*'); //允许来自所有域名请求(不携带cookie请求可以用*，如果有携带cookie请求必须指定域名)

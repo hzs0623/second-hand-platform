@@ -57,5 +57,6 @@ router.post('/payment/shop', buyShop.paymentShop); // 购买商品
 // 订单
 router.get('/order/list', order.getOrderList);
 router.post('/order/edit', order.orderEdit);
+router.post('/order/cancel', order.orderCancel); // 取消订单
 
 module.exports = router;
