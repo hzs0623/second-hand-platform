@@ -21,7 +21,7 @@ module.exports = {
       const { uid, shopList, buy_method, shipping_address = '', phone = "" } = data;
       for (let i = 0; i < shopList.length; i++) {
         const item = shopList[i];
-        const { sid, shop_count, state } = item || {};
+        const { sid, shop_count, state, vendor_uid = "" } = item || {};
 
         // 改变商品列表为被购买状态
         const shops = await db.query(`SELECT count,display FROM shop_list WHERE id=${sid}`);
@@ -33,9 +33,9 @@ module.exports = {
         }
 
         // 添加商品
-        const addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, buy_method,shipping_address,phone,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?)`;
+        const addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, buy_method,shipping_address,phone,vendor_uid,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?,?)`;
 
-        await db.query(addSql, [uid, sid, shop_count, state, buy_method, shipping_address, phone, Date.now(), Date.now()]);
+        await db.query(addSql, [uid, sid, shop_count, state, buy_method, shipping_address, phone, vendor_uid, Date.now(), Date.now()]);
 
         // 删除购物车里商品
         const deteleSql = `DELETE FROM shop_cart WHERE uid=? and sid=? `;

@@ -19,39 +19,50 @@ module.exports = {
     let { uid, curPage, pageSize } = data;
 
     curPage = (curPage - 1) * pageSize;
-    let total = 0;
     try {
-      // 查询出当前用户发布的商品
-      const shopLists = await db.query(`SELECT * FROM ${shopTable} WHERE uid=? and display!=0 limit ${curPage},${pageSize} `, [uid]);
+      // 查询购买表有多少数量 
+      const buyListOrders = await db.query(`SELECT * FROM ${buyTable} WHERE vendor_uid=? limit ${curPage},${pageSize}`, [uid]);
 
-      let list = [];
-      for (let i = 0; i < shopLists.length; i++) {
-        const { id: sid, title, price, sort, image, information } = shopLists[i]; // 商品信息
+      // 总条数
+      const totals = await db.query(`SELECT COUNT(id) FROM ${buyTable}  where vendor_uid=?`, [uid]);
+      const total = totals.length ? totals[0]['COUNT(id)'] : 0;
 
-        const buyItem = await db.query(`SELECT * FROM ${buyTable} WHERE sid=?`, [sid]);
-        buyItem.length && total++
-        buyItem.forEach(item => {
-          const { uid: buyId = '', buy_method = '', shop_count = '', state = '', phone = '', shipping_address = "" } = item;
-          list.push({
-            buy_uid: buyId, // 购买人id，
-            buy_method,
-            title,
-            sid,
-            price,
-            sort,
-            image,
-            shop_count,
-            state,
-            information,
-            shipping_address,
-            phone
-          })
+      let obj = {}; // 判断是否重复
+      const orderlists = [];
+      for (let i = 0; i < buyListOrders.length; i++) {
+        const { sid, uid: buyId, buy_method, shop_count, state, phone, shipping_address } = buyListOrders[i];
+
+        let shopInfo = {}; // 商品信息
+        if (sid in obj) {
+          // 里面是有值的 就直接取商品属性  
+          shopInfo = obj[sid];
+        } else {
+          const shopData = await db.query(`SELECT title, price, sort, image, information,count FROM ${shopTable} WHERE id=?`, [sid]);
+          shopInfo = shopData[0];
+          obj[sid] = shopInfo;
+        }
+
+        const { title, price, sort, image, information, count } = shopInfo;
+        orderlists.push({
+          buy_uid: buyId, // 购买人id，
+          buy_method, // 支付方式
+          title, // 商品标题
+          sid, // 商品id
+          price, // 商品价格
+          sort, // 商品种类
+          image, // 图片
+          shop_count, // 购买数量
+          count_total: count, // 商品总数量
+          state, // 交易状态
+          information,
+          shipping_address,
+          phone
         })
-
       }
+
       ctx.body = {
         ...Tips[1001],
-        data: { list, total }
+        data: { list: orderlists, total }
       }
 
     } catch (error) {
