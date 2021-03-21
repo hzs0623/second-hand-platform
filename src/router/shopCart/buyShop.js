@@ -1,4 +1,6 @@
-// 购买的商品
+/**
+ * 当前用户购买商品
+ **/ 
 const { Utils, Tips } = require('../../utils');
 const db = require('../../db');
 
@@ -93,5 +95,5 @@ module.exports = {
     } catch (e) {
       ctx.body = Tips[1002]
     }
-  }
+  },
 }

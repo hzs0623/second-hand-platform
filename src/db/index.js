@@ -8,8 +8,9 @@ const pool = mysql.createPool(config);
 /**
  * sql: 语句
  * value: 查询值
+ * valid: 返回是否有当前值
 */
-const query = (sql, values) => {
+const query = (sql, values, valid = false) => {
   if (Object.prototype.toString.call(values) === '[object Object]') {
     values = Object.values(values);
   }
@@ -19,9 +20,14 @@ const query = (sql, values) => {
       connection.query(sql, values, (err, res) => {
         if (err) {
           reject(err);
-        } else {
-          resolve(res);
+          return;
+        } 
+        if(valid) {
+         const val = res && res.length ? true : false;
+         resolve(val); 
+         return;
         }
+        resolve(res);
       })
       connection.release();
     })

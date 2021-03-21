@@ -7,6 +7,7 @@ const upload = require('./upload'); // 上传接口
 const shopCart = require('./shopCart'); // 购物车
 const buyShop = require('./shopCart/buyShop');
 const order = require('./order');
+const Useredit = require('./user/admin');
 
 const router = new Router();
 
@@ -24,12 +25,13 @@ router.get('/init/user/map', init.getUsernameList);  // 用户姓名列表
 router.get('/oss/config', init.getOssConfig); // 获取oss配置
 
 // 用户
+router.get('/user/list', User.getUserList);
 router.post('/login', User.login);
 router.post('/register', User.registerUser);
 router.post('/user/edit', User.userEdit);
 router.get('/user/find', User.userInfo);
 router.post('/uesr/valid', User.userInfoValid); // 用户信息校验
-router.post('/uesr/password', User.userEditPassworde); // 密码修改
+router.post('/uesr/password', Useredit.editUserPassword); // 密码修改
 
 // 商品
 router.get('/shop/list', shopList.getList);
@@ -44,7 +46,8 @@ router.get('/shop/search', shopList.shopSearch); // 商品搜索 标题
 // 商品留言
 router.post('/shop/add/message', message.addShopMesg);
 router.get('/shop/get/message', message.getShopMessage);
-router.post('/shop/delete/message', message.deleteShopMessage); // 删除留言
+router.post('/shop/delete/message', message.deleteShopMessage); // 删除留言 
+router.get('/shop/all/message', message.getAllMesList); // 获取所有留言
 
 // 上传接口
 router.post('/upload/image', upload.uploadImg);
@@ -52,13 +55,15 @@ router.post('/upload/image', upload.uploadImg);
 // 购物车
 router.post('/shop/cart/add', shopCart.addShopCart); // 添加购物车
 router.get('/shop/cart/list', shopCart.getShopCart); // 查询购物车列表  
+router.get('/shop/cart/allList', shopCart.getShopCartAllList); // 查询所有购物车列表  
 router.post('/shop/cart/delete', shopCart.deleteShopCart); // 删除购物车
 router.get('/buy/shop/list', buyShop.getbuyShopList); // 已买的商品 
 router.post('/payment/shop', buyShop.paymentShop); // 购买商品 
 
 // 订单
 router.get('/order/list', order.getOrderList);
+router.get('/order/all/List', order.getAllOrderList); // 获取所有订单列表
 router.post('/order/edit', order.orderEdit);
-router.post('/order/cancel', order.orderCancel); // 取消订单
+router.post('/order/cancel', order.orderCancel); // 取消订单 
 
 module.exports = router;

@@ -5,7 +5,7 @@ const table = 'shop_list';
 
 module.exports = {
   /**
-   * 获取商品列表
+   * 获取商品所有列表
   */
   async getList(ctx) {
     try {
@@ -19,7 +19,7 @@ module.exports = {
 
       let { curPage, pageSize, } = data;
       curPage = (Number(curPage) - 1) * pageSize;
-      const sql = `SELECT * FROM ${table} WHERE display=1 limit ${curPage}, ${pageSize}`;
+      const sql = `SELECT * FROM ${table} WHERE display=1 order by id desc limit ${curPage}, ${pageSize}`;
 
       const lists = await db.query(`SELECT COUNT(id) FROM ${table}  where display=1`);
       const total = lists.length ? lists[0]['COUNT(id)'] : 0;

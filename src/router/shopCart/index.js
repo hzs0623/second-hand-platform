@@ -1,5 +1,5 @@
 // 职责： 购物车
-const { Utils, Tips } = require('../../utils');
+const { Utils, Tips, functions } = require('../../utils');
 const db = require('../../db');
 
 const table = `shop_cart`; // 映射map
@@ -94,4 +94,37 @@ module.exports = {
       ctx.body = Tips[1002];
     }
   },
+
+  // 获取所有购物车列表
+  async getShopCartAllList(ctx) {
+    try {
+      const data = Utils.filter(ctx, ['curPage', 'pageSize']);
+      const valid = Utils.formatData(data, {
+        curPage: 'number',
+        pageSize: 'number'
+      });
+      if (!valid) return ctx.body = Tips[400]; // 参数错误
+
+      let { curPage, pageSize } = data;
+      curPage = (Number(curPage) - 1) * pageSize;
+
+      const list = await db.query(`SELECT * FROM ${table} order by create_time desc limit ${curPage}, ${pageSize}`);
+      const total = await db.query(`SELECT COUNT(uid) FROM ${table}`);
+      ctx.body = {
+        ...Tips[1001],
+        data: {
+          list,
+          total: total.length ? total[0]["COUNT(sid)"] : 0,
+        },
+      }
+    
+    } catch(e) {
+      ctx.body = Tips[1002]
+    }
+  },
+
+  // 修改购物车
+  async editShopCart(ctx) {
+
+  }
 }

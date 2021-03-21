@@ -5,7 +5,35 @@ const shopTable = `shop_list`;
 const buyTable = `buy_shop`;
 
 module.exports = {
-  // 获取订单列表
+  // 获取所有订单
+  async getAllOrderList(ctx) {
+    try {
+      const data = Utils.filter(ctx, ['curPage', 'pageSize']);
+      const valid = Utils.formatData(data, {
+        curPage: 'number',
+        pageSize: 'number'
+      });
+      if (!valid) return ctx.body = Tips[400]; // 参数错误
+
+      let { curPage, pageSize } = data;
+      curPage = (Number(curPage) - 1) * pageSize;
+
+      const list = await db.query(`SELECT * FROM ${buyTable} order by create_time desc limit ${curPage}, ${pageSize}`);
+      const total = await db.query(`SELECT COUNT(id) FROM ${buyTable}`);
+   
+      ctx.body = {
+        ...Tips[1001],
+        data: {
+          list,
+          total: total.length ? total[0]["COUNT(id)"] : 0,
+        },
+      }
+    
+    } catch(e) {
+      ctx.body = Tips[1002]
+    }
+  },
+  // 获取当前用户订单列表
   async getOrderList(ctx) {
     const data = Utils.filter(ctx, ['uid', 'pageSize', 'curPage']);
     const valid = Utils.formatData(data, {
@@ -92,8 +120,7 @@ module.exports = {
       ctx.body = Tips[1002]
     }
   },
-
-  // 取消订单
+  // 删除订单
   async orderCancel(ctx) {
     // 删除购物表当前数据
     // 改变商品状态display=1，先获取当前商品数量 加上当前数量

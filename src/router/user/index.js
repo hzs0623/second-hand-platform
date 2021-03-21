@@ -24,6 +24,39 @@ async function formatUser(obj, configs) {
 }
 
 module.exports = class user {
+  // 查询所有用户
+  static async getUserList(ctx) {
+    try {
+      const data = Utils.filter(ctx, ['curPage', 'pageSize']);
+      const valid = Utils.formatData(data, {
+        curPage: 'number',
+        pageSize: 'number'
+      });
+      if (!valid) return ctx.body = Tips[400]; // 参数错误
+
+      const { uid } = ctx.state || {};
+      const curUser = await db.query(`SELECT admin_state FROM ${table} WHERE uid=? `, uid);
+      const { admin_state } = curUser[0];
+
+      let { curPage, pageSize } = data;
+      curPage = (Number(curPage) - 1) * pageSize;
+
+      // 查询字段
+      const findConditions = ['username', 'admin_state', 'uid', 'create_time', 'update_time', 'gender', 'shipping_address', 'sno', 'real_name', 'phone'];
+
+      const sql = `SELECT ${findConditions.join()} FROM ${table} WHERE uid!=? and admin_state < ? order by uid desc limit ${curPage}, ${pageSize}`;
+
+      const findDatas = [uid,admin_state];
+
+      let list = await db.query(sql, findDatas) || []; // 总列表
+      const lists = await db.query(`SELECT COUNT(uid) FROM ${table} WHERE uid!=? and admin_state <= ?`, findDatas);
+      
+      const total = lists.length ? lists[0]['COUNT(uid)'] : 0;
+      ctx.body = { ...Tips[1001], data: { list, total } };
+    } catch(e) {
+      ctx.body = Tips[1002];
+    }
+  }
   // 登陆
   static async login(ctx, next) {
     try {
@@ -36,17 +69,18 @@ module.exports = class user {
 
       let { username, password } = data;
       password = md5(md5(password));
+
       const isUser = await formatUser({ username, password }, ['username']);
       if (!isUser.length) return ctx.body = Tips[1006];
 
-      const sql = 'SELECT uid, username FROM user WHERE username=? and password=? ';
+      const sql = 'SELECT uid, username, admin_state FROM user WHERE username=? and password=? ';
       const value = [username, password];
       const userData = await db.query(sql, value);
       const val = userData[0];
-      const { uid, username: name = "" } = val;
+      const { uid, username: name = "", admin_state  } = val;
       // 生成token
       const token = Utils.generateToken(uid);
-      ctx.body = { ...Tips[1001], data: { user: name, uid, token } };
+      ctx.body = { ...Tips[1001], data: { user: name, uid, token, admin_state } };
     } catch (e) {
       ctx.body = Tips[1002];
     }
@@ -78,7 +112,7 @@ module.exports = class user {
     }
   }
 
-  // 修改信息
+  // 修改个人信息
   static async userEdit(ctx) {
     const data = Utils.filter(ctx, ['uid', 'username', 'phone', 'real_name', 'sno', 'gender', 'avatar', 'shipping_address']);
     const valid = Utils.formatData(data, {
@@ -160,25 +194,6 @@ module.exports = class user {
         }
       }
 
-    } catch (error) {
-      ctx.body = Tips[1002];
-    }
-  }
-
-  // 修改密码
-  static async userEditPassworde(ctx) {
-    const data = Utils.filter(ctx, ['uid', 'username', 'password']);
-    const valid = Utils.formatData(data, {
-      username: 'string',
-      password: 'string',
-      uid: 'number',
-    })
-    if (!valid) return ctx.body = Tips[400];
-
-    try {
-      const { username, uid, password } = data;
-      await db.query(`UPDATE ${table} SET password=? WHERE uid = ? and username=?`, [md5(md5(password)), uid, username])
-      ctx.body = Tips[1001];
     } catch (error) {
       ctx.body = Tips[1002];
     }
