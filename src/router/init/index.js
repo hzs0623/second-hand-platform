@@ -6,15 +6,18 @@ const table = `init_map`; // 映射map
 module.exports = {
   // 查询各个map
   async getInit(ctx) {
-    const sql = `SELECT * FROM ${table}`;
+    const sql = `SELECT type_key, content FROM ${table}`;
     try {
       const res = await db.query(sql);
-      let { sort_map } = res[0];
-      sort_map = JSON.parse(sort_map);
+      let reslut = Object.create(null);
+      res.forEach(item => {
+        const {type_key = '', content =""} = item;
+        reslut[type_key] = JSON.parse(content);
+      })
       ctx.body = {
         ...Tips[1001],
         data: {
-          sort_map
+          ...reslut
         }
       }
     } catch (e) {

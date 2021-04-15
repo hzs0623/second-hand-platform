@@ -27,6 +27,7 @@ module.exports = {
 
         // 改变商品列表为被购买状态
         const shops = await db.query(`SELECT count,display,title FROM shop_list WHERE id=${sid}`);
+        
         const { count: num, display, title = '' } = shops[0];
 
         if (display == 2) {
@@ -35,7 +36,7 @@ module.exports = {
         }
 
         // 添加商品
-        const addSql = `INSERT INTO ${table}(uid, sid,title,shop_count, state, buy_method,shipping_address,phone,vendor_uid,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?,?)`;
+        const addSql = `INSERT INTO ${table}(uid, sid,title,shop_count, state, buy_method,shipping_address,phone,vendor_uid,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?,?,?)`;
 
         await db.query(addSql, [uid, sid, title, shop_count, state, buy_method, shipping_address, phone, vendor_uid, Date.now(), Date.now()]);
 
