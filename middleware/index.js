@@ -7,34 +7,23 @@ const mimeTypes = require('mime-types');
 
 // 跳过校验接口地址
 const notUrlMap = ['/login', '/register', '/public', '/init', '/shop/list', '/shop/get/message', '/shop/item',];
-/**
- * 执行连接时间
-*/
-function logger() {
-  return async (ctx, next) => {
-    const start = Date.now();
-    await next();
-    const ms = Date.now() - start;
-    console.log(`${ctx.method} ${ctx.url} ${ctx.status} - ${ms}ms`);
-  };
-}
 
 /**
  * token中间件
  */
 function checkToken() {
   return async (ctx, next) => {
-    let { url = '' } = ctx;
-    const isValid = notUrlMap.some(str => url.indexOf(str) === 0);
     try {
+      let { url = '' } = ctx;
+      const isValid = notUrlMap.some(str => url.indexOf(str) === 0);
       if (!isValid) {//需要校验登录态
         const { authtoken = "" } = ctx.request.header || {};
         if (!authtoken) return ctx.body = Tips[1005];
-        const uid = await Utils.verifyToken(authtoken) || "";
+        const { uid } = await Utils.verifyToken(authtoken) || {};
         ctx.state = { uid }; // state能获取uid值
         await next();
       } else {
-        // login 和 注册 不需要校验token
+        // 不需要校验token
         await next();
       }
     } catch (e) {
@@ -42,6 +31,7 @@ function checkToken() {
     }
   }
 }
+
 
 function images() {
   return async (ctx, next) => {
@@ -69,7 +59,6 @@ function images() {
 
 
 module.exports = {
-  logger,
   checkToken,
-  images
+  images,
 }

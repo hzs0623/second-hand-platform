@@ -17,7 +17,7 @@ module.exports = {
 
     try {
       const { sid, uid, shop_count } = data;
-      // 先查询一下里面是否有 有就修改
+      // 先查询一下里面是否有，有就修改
       const findSql = `SELECT sid,uid from ${table} where sid=? and uid=?`;
       const res = await db.query(findSql, [sid, uid]);
       if (!res.length) {
@@ -114,7 +114,7 @@ module.exports = {
         ...Tips[1001],
         data: {
           list,
-          total: total.length ? total[0]["COUNT(sid)"] : 0,
+          total: total.length ? total[0]["COUNT(uid)"] : 0,
         },
       }
     

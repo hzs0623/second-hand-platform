@@ -66,7 +66,6 @@ module.exports = class user {
         password: "string"
       });
       if (!valid) return ctx.body = Tips[400]; // 参数错误
-
       let { username, password } = data;
       password = md5(md5(password));
 
@@ -77,9 +76,9 @@ module.exports = class user {
       const value = [username, password];
       const userData = await db.query(sql, value);
       const val = userData[0];
-      const { uid, username: name = "", admin_state  } = val;
+      const { uid, username: name = "", admin_state = ""  } = val;
       // 生成token
-      const token = Utils.generateToken(uid);
+      const token = Utils.generateToken({uid, admin_state});
       ctx.body = { ...Tips[1001], data: { user: name, uid, token, admin_state } };
     } catch (e) {
       ctx.body = Tips[1002];

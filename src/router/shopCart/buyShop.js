@@ -7,7 +7,7 @@ const db = require('../../db');
 const table = `buy_shop`; // 映射map
 
 module.exports = {
-  // 购买商品
+  // 生成订单 购买商品
   async paymentShop(ctx) {
     const data = Utils.filter(ctx, ['uid', 'shopList', 'buy_method', 'shipping_address', 'phone']);
     const valid = Utils.formatData(data, {
@@ -26,8 +26,8 @@ module.exports = {
         const { sid, shop_count, state, vendor_uid = "" } = item || {};
 
         // 改变商品列表为被购买状态
-        const shops = await db.query(`SELECT count,display FROM shop_list WHERE id=${sid}`);
-        const { count: num, display } = shops[0];
+        const shops = await db.query(`SELECT count,display,title FROM shop_list WHERE id=${sid}`);
+        const { count: num, display, title = '' } = shops[0];
 
         if (display == 2) {
           // 当前不加载
@@ -35,9 +35,9 @@ module.exports = {
         }
 
         // 添加商品
-        const addSql = `INSERT INTO ${table}(uid, sid,shop_count, state, buy_method,shipping_address,phone,vendor_uid,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?,?)`;
+        const addSql = `INSERT INTO ${table}(uid, sid,title,shop_count, state, buy_method,shipping_address,phone,vendor_uid,create_time, update_time) VALUES(?,?,?,?,?,?,?,?,?,?)`;
 
-        await db.query(addSql, [uid, sid, shop_count, state, buy_method, shipping_address, phone, vendor_uid, Date.now(), Date.now()]);
+        await db.query(addSql, [uid, sid, title, shop_count, state, buy_method, shipping_address, phone, vendor_uid, Date.now(), Date.now()]);
 
         // 删除购物车里商品
         const deteleSql = `DELETE FROM shop_cart WHERE uid=? and sid=? `;
@@ -60,7 +60,7 @@ module.exports = {
       ctx.body = Tips[1002]
     }
   },
-  // 获取购买的商品列表
+  // 当前用户购买的商品列表
   async getbuyShopList(ctx) {
     const data = Utils.filter(ctx, ['uid']);
     const valid = Utils.formatData(data, {

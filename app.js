@@ -3,7 +3,7 @@ const app = new Koa();
 const path = require('path');
 const router = require('./src/router');
 const koaBody = require('koa-body'); // post请求 上传文件
-const { checkToken, images } = require('./middleware'); // 自定义中间件
+const { checkToken, images} = require('./middleware'); // 自定义中间件
 const cors = require('./libs/koa-cors');// 跨站资源共享
 const { port, bashUrl, upload_url } = require('./src/constant');
 
