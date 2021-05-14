@@ -27,29 +27,37 @@ module.exports = class user {
   // 查询所有用户
   static async getUserList(ctx) {
     try {
-      const data = Utils.filter(ctx, ['curPage', 'pageSize']);
+      const data = Utils.filter(ctx, ['username', 'sno','phone','curPage', 'pageSize']);
       const valid = Utils.formatData(data, {
+        username: 'string',
+        sno: 'string',
+        phone: 'string',
         curPage: 'number',
         pageSize: 'number'
       });
       if (!valid) return ctx.body = Tips[400]; // 参数错误
-
       const { uid } = ctx.state || {};
-      const curUser = await db.query(`SELECT admin_state FROM ${table} WHERE uid=? `, uid);
+      const curUser = await db.query(`SELECT admin_state FROM ${table} WHERE uid=?`, uid);
       const { admin_state } = curUser[0];
 
-      let { curPage, pageSize } = data;
+      let { sno, username, phone, curPage, pageSize } = data;
       curPage = (Number(curPage) - 1) * pageSize;
 
       // 查询字段
       const findConditions = ['username', 'admin_state', 'uid', 'create_time', 'update_time', 'gender', 'shipping_address', 'sno', 'real_name', 'phone'];
 
-      const sql = `SELECT ${findConditions.join()} FROM ${table} WHERE uid!=? and admin_state < ? order by uid desc limit ${curPage}, ${pageSize}`;
+      const sqlStr = Utils.strData({
+        username,
+        phone,
+        sno
+      });
+
+      const sql = `SELECT ${findConditions.join()} FROM ${table} WHERE ${sqlStr} uid!=? and admin_state < ? order by uid desc limit ${curPage}, ${pageSize}`;
 
       const findDatas = [uid,admin_state];
 
       let list = await db.query(sql, findDatas) || []; // 总列表
-      const lists = await db.query(`SELECT COUNT(uid) FROM ${table} WHERE uid!=? and admin_state <= ?`, findDatas);
+      const lists = await db.query(`SELECT COUNT(uid) FROM ${table} WHERE ${sqlStr} uid!=? and admin_state <= ?`, findDatas);
       
       const total = lists.length ? lists[0]['COUNT(uid)'] : 0;
       ctx.body = { ...Tips[1001], data: { list, total } };
@@ -194,6 +202,26 @@ module.exports = class user {
       }
 
     } catch (error) {
+      ctx.body = Tips[1002];
+    }
+  }
+
+  // 删除用户
+  static async userDelete(ctx) {
+    const data = Utils.filter(ctx, ['uid'])
+    const valid = Utils.formatData(data, {
+      uid: "number"
+    });
+    if (!valid) return ctx.body = Tips[400]; // 参数错误
+  
+    try {
+      const deteleSql = `DELETE FROM ${table} WHERE uid=?`;
+      await db.query(deteleSql, data);
+      ctx.body = {
+        ...Tips[1001],
+        data: `delete current user success`
+      }
+    } catch(e) {
       ctx.body = Tips[1002];
     }
   }

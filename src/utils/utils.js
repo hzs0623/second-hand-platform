@@ -127,4 +127,17 @@ module.exports = {
       }
     })
   },
+
+  // 返回有数据的字符串
+  strData(params, sql) {
+    // sno=? and phone=? and username=?
+    let str = '';
+    for(let key in params) {
+      if(params[key] != null && params[key]) {
+        str += `${key}='${params[key]}' and`
+      }
+    }
+    str = str ? str : str.substring(0, str.length - 4);
+    return sql ? str + sql : str;
+  }
 }

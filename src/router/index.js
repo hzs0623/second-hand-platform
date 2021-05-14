@@ -10,15 +10,6 @@ const order = require('./order');
 const Useredit = require('./user/admin');
 
 const router = new Router();
-
-router.get('/', (ctx, next) => {
-  ctx.body = {
-    code: 200,
-    data: {
-      text: '什么都没有'
-    }
-  }
-})
 // map映射
 router.get('/init/map', init.getInit);
 router.get('/init/user/map', init.getUsernameList);  // 用户姓名列表 
@@ -29,6 +20,7 @@ router.get('/user/list', User.getUserList);
 router.post('/login', User.login);
 router.post('/register', User.registerUser);
 router.post('/user/edit', User.userEdit);
+router.post('/user/delete', User.userDelete);
 router.get('/user/find', User.userInfo);
 router.post('/uesr/valid', User.userInfoValid); // 用户信息校验
 router.post('/uesr/password', Useredit.editUserPassword); // 密码修改
